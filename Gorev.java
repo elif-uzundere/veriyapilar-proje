@@ -48,6 +48,6 @@ public class Gorev {
     /** Görevi okunabilir biçimde döndürür. */
     @Override
     public String toString() {
-        return String.format("[ID:%d | Öncelik:%d | Ad: %s]", id, oncelik, ad);
+        return String.format("[ID:%d | Oncelik:%d | Ad: %s]", id, oncelik, ad);
     }
 }

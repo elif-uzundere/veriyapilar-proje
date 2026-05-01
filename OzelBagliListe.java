@@ -1,8 +1,7 @@
 /**
  * Görev Planlayıcı Sistemi - Özel Bağlı Liste
  *
- * <p>Hazır koleksiyon kütüphanesi KULLANILMADAN sıfırdan yazılmış
- * tek yönlü (singly) bağlı liste. Bekleyen görevleri yönetir.</p>
+ * 
  */
 public class OzelBagliListe {
 
@@ -11,15 +10,15 @@ public class OzelBagliListe {
     /** Bağlı listenin her bir halkasını temsil eden düğüm. */
     private static class Dugum {
         Gorev veri;
-        Dugum sonraki;
+        Dugum sonraki; // Vagondaki baglantı kancasi
 
         Dugum(Gorev veri) {
             this.veri = veri;
-            this.sonraki = null;
+            this.sonraki = null; // Yeni vagonun arkası simdilik bos
         }
     }
 
-    // ── Alanlar ───────────────────────────────────────────────────────────────
+    // ── Alanlar ───
 
     private Dugum bas;   // İlk düğüm
     private int boyut;   // Eleman sayısı
@@ -30,7 +29,7 @@ public class OzelBagliListe {
         boyut = 0;
     }
 
-    // ── Temel Operasyonlar ────────────────────────────────────────────────────
+    // ── Temel Operasyonlar ───
 
     /**
      * Listeye yeni bir görevi sonuna ekler.
@@ -39,32 +38,33 @@ public class OzelBagliListe {
      *
      * @param gorev Eklenecek görev
      */
-    public void sonunaEkle(Gorev gorev) {
-        Dugum yeni = new Dugum(gorev);
+    public void sonunaEkle(Gorev g) {
+        // yeni vagon oluşturuyoruz
+        Dugum yeni = new Dugum(g);
+        // eger tren hiç yoksa (liste boşsa)
         if (bas == null) {
-            bas = yeni;
+            bas = yeni; // ilk vagon bu olur
         } else {
-            Dugum gecici = bas;
-            while (gecici.sonraki != null) {
-                gecici = gecici.sonraki;
+            // tren varsa , en son vagonu bulmamız gerekiyor 
+            // bas vagonu kaybetmemek için 'temp' kullanıyoruz
+            Dugum temp = bas;
+            // sonraki kancasi bos olan vagonu bulana kadar ilerle
+            while (temp.sonraki != null) {
+                temp = temp.sonraki;
             }
-            gecici.sonraki = yeni;
+            // en sondaki vagonun kancasina yenş vagonu tak
+            temp.sonraki = yeni;
         }
-        boyut++;
+        boyut++; // tren bir vagon büyüdü
     }
 
     /**
-     * Belirtilen ID'ye sahip görevi listeden siler.
-     *
-     * <p><b>Zaman Karmaşıklığı:</b> O(n) — en kötü durumda tüm liste taranır.</p>
-     *
-     * @param id Silinecek görevin kimliği
-     * @return Silinen Gorev nesnesi; bulunamazsa null
+     * Bu metot, ID numarasina bakarak listeden görev silmemizi saglar
      */
     public Gorev idIleSil(int id) {
         if (bas == null) return null;
 
-        // Baş düğüm hedef mi?
+        // Silmek istediğim Id başta mı?
         if (bas.veri.getId() == id) {
             Gorev silinen = bas.veri;
             bas = bas.sonraki;
@@ -87,12 +87,10 @@ public class OzelBagliListe {
     }
 
     /**
-     * Belirtilen ID'ye sahip görevi döndürür (silmez).
+     * Belirtilen ID numarasina göre bütün bağli listeyi tarar ve o ID'ye sahip görevi döndürür bulamazsa null döndürür.
      *
      * <p><b>Zaman Karmaşıklığı:</b> O(n)</p>
      *
-     * @param id Aranacak görev kimliği
-     * @return Bulunan Gorev; yoksa null
      */
     public Gorev idIleBul(int id) {
         Dugum gecici = bas;
@@ -104,11 +102,10 @@ public class OzelBagliListe {
     }
 
     /**
-     * Listenin başındaki görevi döndürür (silmez).
+     * Listenin başındaki görevi döndürür. Liste boşsa null döner.
      *
      * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
      *
-     * @return Baştaki Gorev; liste boşsa null
      */
     public Gorev basinaBak() {
         return (bas == null) ? null : bas.veri;
@@ -117,11 +114,10 @@ public class OzelBagliListe {
     /**
      * Tüm listeyi konsola yazdırır.
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(n)</p>
      */
     public void listele() {
         if (bas == null) {
-            System.out.println("  (Bekleme listesi boş)");
+            System.out.println("  (Bekleme listesi bos)");
             return;
         }
         Dugum gecici = bas;
@@ -134,12 +130,11 @@ public class OzelBagliListe {
     }
 
     /**
-     * Listedeki tüm görevleri Gorev dizisi olarak döndürür.
+     * Listeyi dosyaya kaydetmek için dizi formatina ceviriyoruz
      * Dosyaya kaydetme işleminde kullanılır.
      *
      * <p><b>Zaman Karmaşıklığı:</b> O(n)</p>
      *
-     * @return Gorev dizisi
      */
     public Gorev[] diziOlarakAl() {
         Gorev[] dizi = new Gorev[boyut];
@@ -153,20 +148,16 @@ public class OzelBagliListe {
     }
 
     /**
-     * Listenin boş olup olmadığını kontrol eder.
+     * Listenin boş olup olmadığına bakar
      *
      * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
      *
-     * @return true → boş, false → dolu
      */
     public boolean bosmu() { return boyut == 0; }
 
     /**
-     * Listedeki eleman sayısını döndürür.
-     *
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
-     *
-     * @return Eleman sayısı
+     * Listede toplam kac gorev olduğunu döndürür
      */
-    public int getBoyut() { return boyut; }
+    public int getBoyut() {
+         return boyut; }
 }

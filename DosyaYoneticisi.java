@@ -30,9 +30,9 @@ public class DosyaYoneticisi {
                         + g.getEklenmeZamani());
                 yazar.newLine();
             }
-            System.out.println("✔ Görevler '" + DOSYA_ADI + "' dosyasına kaydedildi.");
+            System.out.println("✔ Gorevler '" + DOSYA_ADI + "' dosyasina kaydedildi.");
         } catch (IOException e) {
-            System.out.println("⚠ Dosya kaydı sırasında hata: " + e.getMessage());
+            System.out.println("⚠ Dosya kaydi sirasinda hata: " + e.getMessage());
         }
     }
 
@@ -68,13 +68,13 @@ public class DosyaYoneticisi {
                     if (id > maxId) maxId = id;
                     yuklenen++;
                 } catch (NumberFormatException ex) {
-                    System.out.println("⚠ Bozuk satır atlandı: " + satir);
+                    System.out.println("⚠ Bozuk satir atlandi: " + satir);
                 }
             }
             if (yuklenen > 0)
-                System.out.println("✔ " + yuklenen + " görev dosyadan yüklendi.");
+                System.out.println("✔ " + yuklenen + " gorev dosyadan yuklendi.");
         } catch (IOException e) {
-            System.out.println("⚠ Dosya okuma sırasında hata: " + e.getMessage());
+            System.out.println("⚠ Dosya okuma sirasinda hata: " + e.getMessage());
         }
         return maxId;
     }

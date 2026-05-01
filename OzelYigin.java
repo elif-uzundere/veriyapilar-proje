@@ -98,7 +98,7 @@ public class OzelYigin {
      */
     public void listele() {
         if (tepe == null) {
-            System.out.println("  (Geri alma yığını boş)");
+            System.out.println("  (Geri alma yigini bos)");
             return;
         }
         Dugum gecici = tepe;

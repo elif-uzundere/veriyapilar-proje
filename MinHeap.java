@@ -159,7 +159,7 @@ public class MinHeap {
      */
     public void listele() {
         if (boyut == 0) {
-            System.out.println("  (İşlem kuyruğu boş)");
+            System.out.println("  (Islem kuyrugu bos)");
             return;
         }
         for (int i = 0; i < boyut; i++) {
