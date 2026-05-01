@@ -1,385 +1,270 @@
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Scanner;
-
-/**
- * Görev Planlayıcı Sistemi - Ana Sınıf
- *
- * <p>İçerir:</p>
- * <ul>
- *   <li>3 otomatik test senaryosu (normal, sınır değer, hata durumu)</li>
- *   <li>İnteraktif konsol menüsü (try-catch hata yönetimi)</li>
- *   <li>Aging (yaşlandırma) mekanizması</li>
- *   <li>İstatistik sayacı</li>
- *   <li>Dosyaya kaydet / yükle (Veri Kalıcılığı)</li>
- * </ul>
- */
 public class Main {
-
-    // ── Sistem Nesneleri ──────────────────────────────────────────────────────
-
-    /** Bekleyen görevlerin listesi */
+    // --- Sistem Nesneleri ---
     private static OzelBagliListe bekleyenler = new OzelBagliListe();
-
-    /** İşlenecek görevlerin öncelikli kuyruğu */
     private static MinHeap islemKuyrugu = new MinHeap();
-
-    /** Geri alma (Undo) için yığın */
     private static OzelYigin geriAlYigini = new OzelYigin();
-
-    /** Otomatik artan görev ID sayacı */
     private static int idSayaci = 0;
-
-    /** Tamamlanan görev sayısı (istatistik) */
     private static int tamamlananSayisi = 0;
-
-    /** Aging eşiği: bu millisaniyeden uzun bekleyen görevler yükseltilir (30 sn) */
     private static final long AGING_ESIGI_MS = 30_000L;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // TEST SENARYOLARI
-    // ─────────────────────────────────────────────────────────────────────────
+    // --- Analiz Verileri (Yeni) ---
+    private static List<Long> tamamlanmaSureleri = new ArrayList<>();
 
-    /**
-     * Sistemin temel işlevlerini otomatik test eder.
-     * Main menüsü açılmadan önce çalışır.
-     */
-    private static void testleriniCalistir() {
-        System.out.println("╔══════════════════════════════════════════════╗");
-        System.out.println("║          OTOMATIK TEST SENARYOLARI  ║");
-        System.out.println("╚══════════════════════════════════════════════╝\n");
+    // --- Arayüz Bileşenleri ---
+    private static JFrame frame;
+    private static JTable tablo;
+    private static DefaultTableModel tabloModeli;
+    private static JLabel lblBekleyen, lblKuyruk, lblTamamlanan;
 
-        int basarili = 0;
-        int basarisiz = 0;
-
-        // ── Test 1: Normal Durum ──────────────────────────────────────────────
-        System.out.println("▶ TEST 1: Normal Durum — Ekleme & MinHeap Siralamasi");
-        try {
-            OzelBagliListe testListe = new OzelBagliListe();
-            MinHeap testHeap = new MinHeap();
-
-            Gorev g1 = new Gorev(1, "Rapor Yaz",    3, System.currentTimeMillis());
-            Gorev g2 = new Gorev(2, "Sunumu Hazirla",1, System.currentTimeMillis());
-            Gorev g3 = new Gorev(3, "E-posta At",   5, System.currentTimeMillis());
-
-            testListe.sonunaEkle(g1);
-            testListe.sonunaEkle(g2);
-            testListe.sonunaEkle(g3);
-            testHeap.ekle(g1);
-            testHeap.ekle(g2);
-            testHeap.ekle(g3);
-
-            // Heap kökte en küçük öncelik (1) bekleniyor
-            boolean kosul1 = testHeap.tepeyeBak().getId() == 2;
-            // Liste boyutu 3 olmalı
-            boolean kosul2 = testListe.getBoyut() == 3;
-
-            if (kosul1 && kosul2) {
-                System.out.println("  ✔ BASARILI — Heap kokte Oncelik:1 gorevi, Liste boyutu:3\n");
-                basarili++;
-            } else {
-                System.out.println("  ✘ BASARISIZ — Beklenen kosullar saglanmadi\n");
-                basarisiz++;
-            }
-        } catch (Exception e) {
-            System.out.println("  ✘ BASARISIZ — Beklenmeyen istisna: " + e.getMessage() + "\n");
-            basarisiz++;
-        }
-
-        // ── Test 2: Sınır Değer ───────────────────────────────────────────────
-        System.out.println("▶ TEST 2: Sinir Deger — Oncelik araligi disi degerler & bos yapi");
-        try {
-            // Öncelik 0 → 1'e, öncelik 99 → 5'e kısıtlanmalı
-            Gorev asagiFix = new Gorev(10, "Test A", 0,  System.currentTimeMillis());
-            Gorev yukariFix = new Gorev(11, "Test B", 99, System.currentTimeMillis());
-            boolean sinir1 = asagiFix.getOncelik() == 1;
-            boolean sinir2 = yukariFix.getOncelik() == 5;
-
-            // Boş heap & yığından çekme null döndürmeli
-            MinHeap bosHeap = new MinHeap();
-            OzelYigin bosYigin = new OzelYigin();
-            boolean bos1 = bosHeap.enOncelikliyiCek() == null;
-            boolean bos2 = bosYigin.cek() == null;
-
-            if (sinir1 && sinir2 && bos1 && bos2) {
-                System.out.println("  ✔ BASARILI — Sinir degerler duzeltildi, bos yapilar null dondurdu\n");
-                basarili++;
-            } else {
-                System.out.println("  ✘ BASARISIZ — Sinir deger kosullari saglanmadi\n");
-                basarisiz++;
-            }
-        } catch (Exception e) {
-            System.out.println("  ✘ BASARISIZ — Beklenmeyen istisna: " + e.getMessage() + "\n");
-            basarisiz++;
-        }
-
-        // ── Test 3: Hata Durumu ───────────────────────────────────────────────
-        System.out.println("▶ TEST 3: Hata Durumu — Olmayan ID ile silme & Yigin Geri Al");
-        try {
-            OzelBagliListe testListe2 = new OzelBagliListe();
-            Gorev g = new Gorev(20, "Gecici Gorev", 2, System.currentTimeMillis());
-            testListe2.sonunaEkle(g);
-
-            // Olmayan ID ile silme → null dönmeli
-            Gorev bulunamayan = testListe2.idIleSil(999);
-            boolean hata1 = bulunamayan == null;
-
-            // Yığın Geri Al: ekle ve geri al
-            OzelYigin yigin = new OzelYigin();
-            yigin.it(g);
-            Gorev geriAlinan = yigin.cek();
-            boolean hata2 = geriAlinan != null && geriAlinan.getId() == 20;
-            boolean hata3 = yigin.bosmu();
-
-            if (hata1 && hata2 && hata3) {
-                System.out.println("  ✔ BASARILI — Olmayan ID null dondurdu, Yigin geri alma dogru calisti\n");
-                basarili++;
-            } else {
-                System.out.println("  ✘ BASARISIZ — Hata senaryosu kosullari saglanmadi\n");
-                basarisiz++;
-            }
-        } catch (Exception e) {
-            System.out.println("  ✘ BASARISIZ — Beklenmeyen istisna: " + e.getMessage() + "\n");
-            basarisiz++;
-        }
-
-        System.out.println("──────────────────────────────────────────────");
-        System.out.println("  Sonuc: " + basarili + "/3 test basarili, "
-                + basarisiz + "/3 test basarisiz");
-        System.out.println("──────────────────────────────────────────────\n");
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // AGING (YAŞLANDIRMA) MEKANİZMASI
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Bekleme listesindeki görevleri tarar;
-     * eşik süreyi aşanların önceliğini 1 birim düşürür (BONUS).
-     *
-     * <p><b>Zaman Karmaşıklığı:</b> O(n) tarama + O(log n) heap güncellemesi = O(n log n)</p>
-     */
-    private static void yaslandirmaUygula() {
-        long simdi = System.currentTimeMillis();
-        Gorev[] gorevler = bekleyenler.diziOlarakAl();
-        int sayac = 0;
-        for (Gorev g : gorevler) {
-            long bekleme = simdi - g.getEklenmeZamani();
-            if (bekleme >= AGING_ESIGI_MS && g.getOncelik() > 1) {
-                int eskiOncelik = g.getOncelik();
-                g.setOncelik(eskiOncelik - 1);
-                islemKuyrugu.oncelikGuncelle(g.getId(), g.getOncelik());
-                System.out.printf("  ⬆ Aging: [ID:%d '%s'] oncelik %d → %d%n",
-                        g.getId(), g.getAd(), eskiOncelik, g.getOncelik());
-                sayac++;
-            }
-        }
-        if (sayac == 0) System.out.println("  (Yaslandirmayi hak eden gorev yok)");
-        else System.out.println("  Toplam " + sayac + " gorev yukseltildi.");
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // MENÜ YARDIMCILARI
-    // ─────────────────────────────────────────────────────────────────────────
-
-    private static void menuYazdir() {
-        System.out.println("\n╔══════════════════════════════════════════════╗");
-        System.out.println("║      GERÇEK ZAMANLI GOREV PLANLAYICI ║");
-        System.out.println("╠══════════════════════════════════════════════╣");
-        System.out.println("║  1. Yeni Gorev Ekle                  ║");
-        System.out.println("║  2. Sonraki Gorevi Isle (MinHeap)    ║");
-        System.out.println("║  3. Son Islemi Geri Al (Undo)        ║");
-        System.out.println("║  4. Bekleyen Gorevleri Listele       ║");
-        System.out.println("║  5. Islem Kuyrugunu Listele          ║");
-        System.out.println("║  6. Aging Uygula (Oncelik Yukselt)   ║");
-        System.out.println("║  7. Istatistikleri Goster            ║");
-        System.out.println("║  8. Gorev Sil (ID ile)               ║");
-        System.out.println("║  0. Cikis (Kaydet & Kapat)           ║");
-        System.out.println("╚══════════════════════════════════════════════╝");
-        System.out.print("Seciminiz: ");
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // MAIN
-    // ─────────────────────────────────────────────────────────────────────────
+    // --- Tasarım Renkleri ---
+    private static final Color PRIMARY_COLOR = new Color(79, 70, 229);
+    private static final Color SIDEBAR_COLOR = new Color(249, 250, 251);
+    private static final Color SUCCESS_COLOR = new Color(34, 197, 94);
+    private static final Color DANGER_COLOR = new Color(239, 68, 68);
 
     public static void main(String[] args) {
-        System.setProperty("file.encoding", "UTF-8");
- try {
-        System.setOut(new java.io.PrintStream(System.out, true, "UTF-8"));
-        System.setErr(new java.io.PrintStream(System.err, true, "UTF-8"));
-    } catch (java.io.UnsupportedEncodingException e) {
-        // UTF-8 desteklenmiyorsa sessizce devam et
-    }
-    
-        // 1) Kaydedilmiş görevleri yükle
+        try {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception e) {}
+
         idSayaci = DosyaYoneticisi.yukle(bekleyenler, idSayaci);
+        yenidenHeapOlustur();
 
-        // Yüklenen görevleri heap'e de ekle
-        Gorev[] yuklenenler = bekleyenler.diziOlarakAl();
-        for (Gorev g : yuklenenler) {
-            islemKuyrugu.ekle(g);
-        }
-
-        // 2) Otomatik test senaryolarını çalıştır
-        testleriniCalistir();
-
-        // 3) İnteraktif konsol menüsü
-        Scanner scanner = new Scanner(System.in);
-        boolean calis = true;
-
-        while (calis) {
-            menuYazdir();
-
-            int secim = -1;
-            try {
-                String girdi = scanner.nextLine().trim();
-                secim = Integer.parseInt(girdi);
-            } catch (NumberFormatException e) {
-                System.out.println("⚠ Gecersiz giris! Lutfen menudeki sayilari kullanin.");
-                continue;
-            }
-
-            switch (secim) {
-
-                // ── 1: Görev Ekle ─────────────────────────────────────────────
-                case 1: {
-                    System.out.print("Gorev adi: ");
-                    String ad = scanner.nextLine().trim();
-                    if (ad.isEmpty()) {
-                        System.out.println("⚠ Gorev adi bos olamaz!");
-                        break;
-                    }
-
-                    int oncelik = -1;
-                    while (oncelik < 1 || oncelik > 5) {
-                        System.out.print("Oncelik (1=En acil … 5=En dusuk): ");
-                        try {
-                            oncelik = Integer.parseInt(scanner.nextLine().trim());
-                            if (oncelik < 1 || oncelik > 5)
-                                System.out.println("⚠ 1 ile 5 arasinda bir deger giriniz!");
-                        } catch (NumberFormatException e) {
-                            System.out.println("⚠ Sayisal deger giriniz!");
-                        }
-                    }
-
-                    idSayaci++;
-                    Gorev yeni = new Gorev(idSayaci, ad, oncelik, System.currentTimeMillis());
-                    bekleyenler.sonunaEkle(yeni);
-                    islemKuyrugu.ekle(yeni);
-                    System.out.println("✔ Gorev eklendi: " + yeni);
-                    break;
-                }
-
-                // ── 2: Görevi İşle ───────────────────────────────────────────
-                case 2: {
-                    Gorev islenen = islemKuyrugu.enOncelikliyiCek();
-                    if (islenen == null) {
-                        System.out.println("⚠ Islem kuyrugu bos!");
-                    } else {
-                        bekleyenler.idIleSil(islenen.getId());
-                        geriAlYigini.it(islenen);
-                        tamamlananSayisi++;
-                        System.out.println("✔ Islendi: " + islenen);
-                        System.out.println("  (Toplam tamamlanan: " + tamamlananSayisi + ")");
-                    }
-                    break;
-                }
-
-                // ── 3: Geri Al (Undo) ────────────────────────────────────────
-                case 3: {
-                    Gorev geriAl = geriAlYigini.cek();
-                    if (geriAl == null) {
-                        System.out.println("⚠ Geri alinacak islem yok!");
-                    } else {
-                        bekleyenler.sonunaEkle(geriAl);
-                        islemKuyrugu.ekle(geriAl);
-                        tamamlananSayisi = Math.max(0, tamamlananSayisi - 1);
-                        System.out.println("↩ Geri alindi: " + geriAl);
-                    }
-                    break;
-                }
-
-                // ── 4: Bekleyen Listele ───────────────────────────────────────
-                case 4: {
-                    System.out.println("\n── Bekleyen Gorevler (" + bekleyenler.getBoyut() + ") ──");
-                    bekleyenler.listele();
-                    break;
-                }
-
-                // ── 5: İşlem Kuyruğu Listele ─────────────────────────────────
-                case 5: {
-                    System.out.println("\n── Islem Kuyrugu (MinHeap) ──");
-                    islemKuyrugu.listele();
-                    break;
-                }
-
-                // ── 6: Aging ─────────────────────────────────────────────────
-                case 6: {
-                    System.out.println("\n── Yaslandirma Uygulaniyor ──");
-                    yaslandirmaUygula();
-                    break;
-                }
-
-                // ── 7: İstatistik ────────────────────────────────────────────
-                case 7: {
-                    System.out.println("\n── Istatistikler ──────────────────");
-                    System.out.println("  Bekleyen gorev sayisi  : " + bekleyenler.getBoyut());
-                    System.out.println("  Işlem kuyrugu boyutu   : " + islemKuyrugu.getBoyut());
-                    System.out.println("  Geri alma yigini boyutu: " + geriAlYigini.getBoyut());
-                    System.out.println("  Tamamlanan gorev sayisi: " + tamamlananSayisi);
-                    System.out.println("  Bir sonraki gorev       : " +
-                            (islemKuyrugu.tepeyeBak() == null ? "(kuyruk bos)" : islemKuyrugu.tepeyeBak()));
-                    break;
-                }
-
-                // ── 8: Görev Sil ─────────────────────────────────────────────
-                case 8: {
-                    System.out.print("Silinecek gorevin ID'si: ");
-                    try {
-                        int silId = Integer.parseInt(scanner.nextLine().trim());
-                        Gorev silinen = bekleyenler.idIleSil(silId);
-                        if (silinen == null) {
-                            System.out.println("⚠ Bu ID'ye sahip gorev bulunamadi: " + silId);
-                        } else {
-                            // Heap'ten çıkarmak için heap'i yeniden oluştur (O(n log n))
-                            yenidenHeapOlustur();
-                            System.out.println("✔ Silindi: " + silinen);
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("⚠ Gecerli bir ID sayisi giriniz!");
-                    }
-                    break;
-                }
-
-                // ── 0: Çıkış ─────────────────────────────────────────────────
-                case 0: {
-                    DosyaYoneticisi.kaydet(bekleyenler);
-                    System.out.println("Iyi calismalar! Sistem kapatildi.");
-                    calis = false;
-                    break;
-                }
-
-                default: {
-                    System.out.println("⚠ Gecersiz secim! Lutfen menudeki sayilari kullanin.");
-                }
-            }
-        }
-
-        scanner.close();
+        SwingUtilities.invokeLater(() -> {
+            arayuzuOlustur();
+            tabloyuGuncelle();
+        });
     }
 
-    /**
-     * Heap'i bekleyen listesindeki görevlerden sıfırdan yeniden oluşturur.
-     * Görev silindiğinde heap'i tutarlı tutmak için kullanılır.
-     *
-     * <p><b>Zaman Karmaşıklığı:</b> O(n log n)</p>
-     */
+    private static void arayuzuOlustur() {
+        frame = new JFrame("Gerçek Zamanlı Görev Zamanlayıcı");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1100, 750);
+        frame.setLayout(new BorderLayout());
+
+        // Üst Panel: Kartlar
+        JPanel cardContainer = new JPanel(new GridLayout(1, 3, 20, 0));
+        cardContainer.setBorder(new EmptyBorder(25, 25, 25, 25));
+        cardContainer.setBackground(Color.WHITE);
+        lblBekleyen = createStatCard(cardContainer, "Bekleyen", "0", new Color(59, 130, 246));
+        lblKuyruk = createStatCard(cardContainer, "Öncelikli", "0", PRIMARY_COLOR);
+        lblTamamlanan = createStatCard(cardContainer, "Tamamlanan", "0", SUCCESS_COLOR);
+        frame.add(cardContainer, BorderLayout.NORTH);
+
+        // Orta Panel: Tablo
+        String[] kolonlar = {"ID", "Görev Adı", "Öncelik", "Durum"};
+        tabloModeli = new DefaultTableModel(kolonlar, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tablo = new JTable(tabloModeli);
+        tablo.setRowHeight(40);
+        
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < tablo.getColumnCount(); i++) tablo.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+
+        JScrollPane scrollPane = new JScrollPane(tablo);
+        JPanel tableWrapper = new JPanel(new BorderLayout());
+        tableWrapper.setBorder(new EmptyBorder(0, 25, 25, 10));
+        tableWrapper.setBackground(Color.WHITE);
+        tableWrapper.add(scrollPane);
+        frame.add(tableWrapper, BorderLayout.CENTER);
+
+        // Sağ Panel: Sidebar
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setPreferredSize(new Dimension(250, 0));
+        sidebar.setBackground(SIDEBAR_COLOR);
+        sidebar.setBorder(new EmptyBorder(20, 10, 25, 25));
+
+        sidebar.add(createSidebarButton("➕ Yeni Görev", PRIMARY_COLOR, e -> gorevEkleDialog()));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createSidebarButton("⚙️ Görevi İşle", SUCCESS_COLOR, e -> gorevIsle()));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createSidebarButton("📊 Analiz Raporu", new Color(245, 158, 11), e -> raporGoster()));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createSidebarButton("↩️ Geri Al", Color.DARK_GRAY, e -> geriAl()));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createSidebarButton("⏳ Aging Uygula", new Color(124, 58, 237), e -> { yaslandirmaUygula(); tabloyuGuncelle(); }));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(createSidebarButton("🗑️ ID ile Sil", DANGER_COLOR, e -> silmeDialog()));
+        sidebar.add(Box.createVerticalGlue());
+        sidebar.add(createSidebarButton("💾 Kaydet ve Çık", new Color(31, 41, 55), e -> { DosyaYoneticisi.kaydet(bekleyenler); System.exit(0); }));
+
+        frame.add(sidebar, BorderLayout.EAST);
+        frame.setVisible(true);
+    }
+
+    // --- Yeni Fonksiyon: İstatistiksel Raporlama ---
+    private static void raporGoster() {
+        if (tamamlanmaSureleri.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Henüz analiz edilecek tamamlanmış görev yok!", "Gerçek Zamanlı Görev Zamanlayıcı - Analiz Raporu", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        long toplam = 0, enKisa = Long.MAX_VALUE, enUzun = 0;
+        for (long sure : tamamlanmaSureleri) {
+            toplam += sure;
+            if (sure < enKisa) enKisa = sure;
+            if (sure > enUzun) enUzun = sure;
+        }
+        double ortalama = (double) toplam / tamamlanmaSureleri.size() / 1000.0;
+
+        String mesaj = String.format(
+            "GÖREV ANALİZ RAPORU\n" +
+            "-----------------------------------\n" +
+            "Toplam Tamamlanan: %d\n" +
+            "Ortalama İşlem Süresi: %.2f saniye\n" +
+            "En Hızlı İşlem: %.2f saniye\n" +
+            "En Yavaş İşlem: %.2f saniye\n" +
+            "-----------------------------------",
+            tamamlanmaSureleri.size(), ortalama, enKisa / 1000.0, enUzun / 1000.0
+        );
+
+        JOptionPane.showMessageDialog(frame, mesaj, "Gerçek Zamanlı Görev Zamanlayıcı - Analiz Merkezi", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private static void gorevIsle() {
+        Gorev islenen = islemKuyrugu.enOncelikliyiCek();
+        if (islenen != null) {
+            // Süre Analizi Yap (Şimdi - Eklenme Zamanı)
+            long gecenSure = System.currentTimeMillis() - islenen.getEklenmeZamani();
+            tamamlanmaSureleri.add(gecenSure);
+
+            bekleyenler.idIleSil(islenen.getId());
+            geriAlYigini.it(islenen);
+            tamamlananSayisi++;
+            tabloyuGuncelle();
+            JOptionPane.showMessageDialog(frame, islenen.getAd() + " işlendi.\nSüre: " + (gecenSure / 1000.0) + " sn.");
+        } else {
+            JOptionPane.showMessageDialog(frame, "Kuyruk boş!");
+        }
+    }
+
+    // --- Yardımcı Metodlar ---
+    private static JLabel createStatCard(JPanel container, String title, String value, Color accent) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(229, 231, 235)), new EmptyBorder(15, 15, 15, 15)));
+        JLabel t = new JLabel(title.toUpperCase()); t.setFont(new Font("SansSerif", Font.BOLD, 10)); t.setForeground(Color.GRAY);
+        JLabel v = new JLabel(value); v.setFont(new Font("SansSerif", Font.BOLD, 25)); v.setForeground(accent);
+        card.add(t, BorderLayout.NORTH); card.add(v, BorderLayout.SOUTH);
+        container.add(card);
+        return v;
+    }
+
+    private static JButton createSidebarButton(String text, Color bg, java.awt.event.ActionListener action) {
+        JButton btn = new JButton(text);
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        btn.setBackground(bg); btn.setForeground(Color.WHITE); btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.addActionListener(action);
+        return btn;
+    }
+
+    private static void tabloyuGuncelle() {
+        tabloModeli.setRowCount(0);
+        for (Gorev g : bekleyenler.diziOlarakAl()) tabloModeli.addRow(new Object[]{"#" + g.getId(), g.getAd(), "Öncelik: " + g.getOncelik(), "Bekliyor"});
+        lblBekleyen.setText(String.valueOf(bekleyenler.getBoyut()));
+        lblKuyruk.setText(String.valueOf(islemKuyrugu.getBoyut()));
+        lblTamamlanan.setText(String.valueOf(tamamlananSayisi));
+    }
+
+   private static void gorevEkleDialog() {
+        // Görev adı girişi
+        String ad = JOptionPane.showInputDialog(frame, "Görev Adı Giriniz:", "Yeni Görev", JOptionPane.PLAIN_MESSAGE);
+        if (ad == null || ad.trim().isEmpty()) return;
+
+        // Öncelik seçme seçenekleri
+        String[] oncelikler = {"1 (En Yüksek)", "2", "3", "4", "5 (En Düşük)"};
+        
+        // Seçim kutusu (Combobox) içeren dialog
+        Object secim = JOptionPane.showInputDialog(
+            frame, 
+            "Öncelik Seviyesini Seçin:", 
+            "Öncelik Belirle", 
+            JOptionPane.QUESTION_MESSAGE, 
+            null, 
+            oncelikler, 
+            oncelikler[2] // Varsayılan olarak 3 seçili gelir
+        );
+        
+        if (secim != null) {
+            String secimStr = secim.toString().trim();
+            int oncelik = -1;
+            switch (secimStr) {
+                case "1 (En Yüksek)": oncelik = 1; break;
+                case "2": oncelik = 2; break;
+                case "3": oncelik = 3; break;
+                case "4": oncelik = 4; break;
+                case "5 (En Düşük)": oncelik = 5; break;
+                default: break;
+            }
+
+            if (oncelik < 1 || oncelik > 5) {
+                JOptionPane.showMessageDialog(frame, "Lütfen 1 ile 5 arasında bir öncelik seçin.", "Geçersiz Öncelik", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            idSayaci++;
+            // Yeni görevi oluştur (ID, Ad, Öncelik, Mevcut Zaman)
+            Gorev yeni = new Gorev(idSayaci, ad, oncelik, System.currentTimeMillis());
+            
+            // Veri yapılarına ekle
+            bekleyenler.sonunaEkle(yeni);
+            islemKuyrugu.ekle(yeni);
+            
+            // Arayüzü tazele
+            tabloyuGuncelle();
+        }
+    }
+
+    private static void geriAl() {
+        Gorev g = geriAlYigini.cek();
+        if (g != null) {
+            bekleyenler.sonunaEkle(g);
+            islemKuyrugu.ekle(g);
+            tamamlananSayisi = Math.max(0, tamamlananSayisi - 1);
+            if (!tamamlanmaSureleri.isEmpty()) tamamlanmaSureleri.remove(tamamlanmaSureleri.size() - 1);
+            tabloyuGuncelle();
+        }
+    }
+
+    private static void silmeDialog() {
+        String idStr = JOptionPane.showInputDialog(frame, "ID:");
+        try {
+            int id = Integer.parseInt(idStr);
+            if (bekleyenler.idIleSil(id) != null) { yenidenHeapOlustur(); tabloyuGuncelle(); }
+        } catch (Exception e) {}
+    }
+
+    private static void yaslandirmaUygula() {
+        long simdi = System.currentTimeMillis();
+        for (Gorev g : bekleyenler.diziOlarakAl()) {
+            if (simdi - g.getEklenmeZamani() >= AGING_ESIGI_MS && g.getOncelik() > 1) {
+                g.setOncelik(g.getOncelik() - 1);
+                islemKuyrugu.oncelikGuncelle(g.getId(), g.getOncelik());
+            }
+        }
+    }
+
     private static void yenidenHeapOlustur() {
         islemKuyrugu = new MinHeap();
-        Gorev[] gorevler = bekleyenler.diziOlarakAl();
-        for (Gorev g : gorevler) {
-            islemKuyrugu.ekle(g);
-        }
+        for (Gorev g : bekleyenler.diziOlarakAl()) islemKuyrugu.ekle(g);
     }
-
 }
