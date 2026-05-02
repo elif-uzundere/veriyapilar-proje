@@ -7,7 +7,7 @@ import java.io.*;
  * ve program başladığında yeniden yükler (Veri Kalıcılığı / Bonus).</p>
  *
  * <p>Dosya formatı (CSV benzeri, her satır bir görev):</p>
- * <pre>id,ad,oncelik,eklenmeZamani</pre>
+ * <pre>id,ad,oncelik,eklenmeZamani,teslimZamani</pre>
  */
 public class DosyaYoneticisi {
 
@@ -27,7 +27,8 @@ public class DosyaYoneticisi {
                 yazar.write(g.getId() + ","
                         + g.getAd().replace(",", "_;_") + ","   // virgülden kaçış
                         + g.getOncelik() + ","
-                        + g.getEklenmeZamani());
+                        + g.getEklenmeZamani() + ","
+                        + g.getTeslimZamani());
                 yazar.newLine();
             }
             System.out.println("✔ Gorevler '" + DOSYA_ADI + "' dosyasina kaydedildi.");
@@ -57,14 +58,15 @@ public class DosyaYoneticisi {
             while ((satir = okuyucu.readLine()) != null) {
                 satir = satir.trim();
                 if (satir.isEmpty()) continue;
-                String[] parcalar = satir.split(",", 4);
-                if (parcalar.length < 4) continue;
+                String[] parcalar = satir.split(",", 5);
+                if (parcalar.length < 5) continue;
                 try {
                     int id             = Integer.parseInt(parcalar[0].trim());
                     String ad          = parcalar[1].trim().replace("_;_", ",");
                     int oncelik        = Integer.parseInt(parcalar[2].trim());
                     long eklenmeZamani = Long.parseLong(parcalar[3].trim());
-                    liste.sonunaEkle(new Gorev(id, ad, oncelik, eklenmeZamani));
+                    long teslimZamani  = Long.parseLong(parcalar[4].trim());
+                    liste.sonunaEkle(new Gorev(id, ad, oncelik, eklenmeZamani, teslimZamani));
                     if (id > maxId) maxId = id;
                     yuklenen++;
                 } catch (NumberFormatException ex) {

@@ -129,6 +129,14 @@ public class MinHeap {
      */
     public int getBoyut() { return boyut; }
 
+    public Gorev[] diziOlarakAl() {
+        Gorev[] sonuc = new Gorev[boyut];
+        for (int i = 0; i < boyut; i++) {
+            sonuc[i] = dizi[i];
+        }
+        return sonuc;
+    }
+
     /* heap'teki tüm görevleri öncelik sırasına göre listeler (en acil ilk).
      * <p><b>Zaman Karmaşıklığı:</b> O(n)</p>
      */

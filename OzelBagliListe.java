@@ -1,18 +1,13 @@
-/**
- * Görev Planlayıcı Sistemi - Özel Bağlı Liste
- *
- * 
- */
+// ozel bagli liste sınıfı, gorevleri tutmak için kullanılır
 public class OzelBagliListe {
 
-    // ── İç Düğüm Sınıfı ───────────────────────────────────────────────────────
-
-    /** Bağlı listenin her bir halkasını temsil eden düğüm. */
+    // ── İç Sınıf: Dugum ──
+    // dugum tek bir vagon. disaridan erisilemez, sadece OzelBagliListe'nin icinde kullanilir
     private static class Dugum {
-        Gorev veri;
+        Gorev veri; // Vagonun icindeki gorev
         Dugum sonraki; // Vagondaki baglantı kancasi
 
-        Dugum(Gorev veri) {
+        Dugum(Gorev veri) {// yeni bir vagon yaparken gorev bilgisini veriyoruz
             this.veri = veri;
             this.sonraki = null; // Yeni vagonun arkası simdilik bos
         }
@@ -26,18 +21,10 @@ public class OzelBagliListe {
     /** Boş bir bağlı liste oluşturur. */
     public OzelBagliListe() {
         bas = null;
-        boyut = 0;
+        boyut = 0;// Başlangıçta liste boş
     }
 
-    // ── Temel Operasyonlar ───
-
-    /**
-     * Listeye yeni bir görevi sonuna ekler.
-     *
-     * <p><b>Zaman Karmaşıklığı:</b> O(n) — listenin sonuna gitmek gerekir.</p>
-     *
-     * @param gorev Eklenecek görev
-     */
+  
     public void sonunaEkle(Gorev g) {
         // yeni vagon oluşturuyoruz
         Dugum yeni = new Dugum(g);
