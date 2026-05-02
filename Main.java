@@ -425,7 +425,7 @@ public class Main {
     }
 
     private static void gecmisiKaydet() {
-        try (BufferedWriter yazar = new BufferedWriter(new FileWriter("gecmis.txt"))) {
+        try (BufferedWriter yazar = new BufferedWriter(new FileWriter("gecmis.csv"))) {
             for (int i = 0; i < tamamlananGorevler.size(); i++) {
                 Gorev g = tamamlananGorevler.get(i);
                 long sure = tamamlanmaSureleri.get(i);
@@ -437,14 +437,14 @@ public class Main {
                         + g.getTeslimZamani());
                 yazar.newLine();
             }
-            System.out.println("✔ Tamamlanan görev geçmişi 'gecmis.txt' dosyasına kaydedildi.");
+            System.out.println("✔ Tamamlanan görev geçmişi 'gecmis.csv' dosyasına kaydedildi.");
         } catch (IOException e) {
             System.out.println("⚠ Geçmiş kaydetme sırasında hata: " + e.getMessage());
         }
     }
 
     private static void gecmisiYukle() {
-        File dosya = new File("gecmis.txt");
+        File dosya = new File("gecmis.csv");
         if (!dosya.exists()) return;
 
         try (BufferedReader okuyucu = new BufferedReader(new FileReader(dosya))) {

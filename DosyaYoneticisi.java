@@ -3,7 +3,7 @@ import java.io.*;
 /**
  * Görev Planlayıcı Sistemi - Dosya Yöneticisi
  *
- * <p>Bekleyen görevleri {@code gorevler.txt} dosyasına kaydeder
+ * <p>Bekleyen görevleri {@code gorevler.csv} dosyasına kaydeder
  * ve program başladığında yeniden yükler (Veri Kalıcılığı / Bonus).</p>
  *
  * <p>Dosya formatı (CSV benzeri, her satır bir görev):</p>
@@ -11,7 +11,7 @@ import java.io.*;
  */
 public class DosyaYoneticisi {
 
-    private static final String DOSYA_ADI = "gorevler.txt";
+    private static final String DOSYA_ADI = "gorevler.csv";
 
     /**
      * Bağlı listedeki tüm görevleri dosyaya kaydeder.
