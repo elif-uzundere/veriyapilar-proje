@@ -15,14 +15,14 @@ public class Main {
     // --- Sistem Nesneleri ---
     private static OzelBagliListe bekleyenler = new OzelBagliListe();
     private static MinHeap islemKuyrugu = new MinHeap();
-    private static OzelYigin geriAlYigini = new OzelYigin();
+    private final static OzelYigin geriAlYigini = new OzelYigin();
     private static int idSayaci = 0;
     private static int tamamlananSayisi = 0;
     private static final long AGING_ESIGI_MS = 30_000L;
 
     // --- Analiz Verileri (Yeni) ---
-    private static List<Long> tamamlanmaSureleri = new ArrayList<>();
-    private static List<Gorev> tamamlananGorevler = new ArrayList<>();
+    private final static List<Long> tamamlanmaSureleri = new ArrayList<>();
+    private final static List<Gorev> tamamlananGorevler = new ArrayList<>();
 
     // --- Arayüz Bileşenleri ---
     private static JFrame frame;
@@ -45,7 +45,9 @@ public class Main {
                     break;
                 }
             }
-        } catch (Exception e) {}
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            // Nimbus look and feel not available; continue with default.
+        }
 
         idSayaci = DosyaYoneticisi.yukle(bekleyenler, idSayaci);
         gecmisiYukle();
@@ -168,13 +170,14 @@ public class Main {
         String enUzunGorev = tamamlananGorevler.get(enUzunIndex).getAd();
 
         String mesaj = String.format(
-            "GÖREV ANALİZ RAPORU\n" +
-            "-----------------------------------\n" +
-            "Toplam Tamamlanan: %d\n" +
-            "Ortalama İşlem Süresi: %.2f saniye\n" +
-            "En Kısa İşlem: %s (%.2f saniye)\n" +
-            "En Uzun İşlem: %s (%.2f saniye)\n" +
-            "-----------------------------------",
+            """
+            GÖREV ANALİZ RAPORU
+            -----------------------------------
+            Toplam Tamamlanan: %d
+            Ortalama İşlem Süresi: %.2f saniye
+            En Kısa İşlem: %s (%.2f saniye)
+            En Uzun İşlem: %s (%.2f saniye)
+            -----------------------------------""",
             tamamlanmaSureleri.size(), ortalama, enKisaGorev, enKisa / 1000.0, enUzunGorev, enUzun / 1000.0
         );
 
@@ -239,11 +242,13 @@ public class Main {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         for (Gorev g : gosterilecekler) {
             String oncelikMetni = String.valueOf(g.getOncelik());
-            if (g.getOncelik() == 1) oncelikMetni += " (En Acil)";
-            else if (g.getOncelik() == 2) oncelikMetni += " (Yüksek)";
-            else if (g.getOncelik() == 3) oncelikMetni += " (Normal)";
-            else if (g.getOncelik() == 4) oncelikMetni += " (Düşük)";
-            else if (g.getOncelik() == 5) oncelikMetni += " (Çok Düşük)";
+            switch (g.getOncelik()) {
+                case 1 -> oncelikMetni += " (En Acil)";
+                case 2 -> oncelikMetni += " (Yüksek)";
+                case 3 -> oncelikMetni += " (Normal)";
+                case 4 -> oncelikMetni += " (Düşük)";
+                case 5 -> oncelikMetni += " (Çok Düşük)";
+            }
 
             String teslimTarihi = dateFormat.format(new Date(g.getTeslimZamani()));
 
@@ -336,6 +341,9 @@ public class Main {
 
     private static void silmeDialog() {
         String idStr = JOptionPane.showInputDialog(frame, "ID:");
+        if (idStr == null) {
+            return;
+        }
         try {
             int id = Integer.parseInt(idStr);
             if (bekleyenler.idIleSil(id) != null) {
@@ -343,7 +351,9 @@ public class Main {
                 tabloyuGuncelle();
                 verileriKaydet();
             }
-        } catch (Exception e) {}
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Geçerli bir ID girin.", "Hata", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private static void tumBekleyenleriSil() {
