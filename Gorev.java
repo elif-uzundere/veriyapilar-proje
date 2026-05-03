@@ -5,10 +5,10 @@
 public class Gorev {
 
     /** Görevin benzersiz kimlik numarası */
-    private int id;
+    private final int id;
 
     /** Görevin adı */
-    private String ad;
+    private final String ad;
 
     /**
      * Öncelik değeri: 1 = En acil, 5 = En düşük.
@@ -17,7 +17,7 @@ public class Gorev {
     private int oncelik;
 
     /** Görevin sisteme eklendiği zaman (milisaniye cinsinden) */
-    private long eklenmeZamani;
+    private final long eklenmeZamani;
 
     /** Görevin teslim edilmesi gereken zaman (milisaniye cinsinden) */
     private long teslimZamani;

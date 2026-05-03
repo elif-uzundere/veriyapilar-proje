@@ -40,12 +40,13 @@ public class MinHeap {
         dizi[b] = gecici;
     }
 
-   /* kapasiteyi ikiye katlar, heap dolduğunda çağrılır (dinamik dizi mantigi)*/
+  // DİZİ KAPASİTESİNİ ARTIRMA (ARRAY EXPANSION) İŞLEMİ
+// Optimizasyon: Dizi dolduğunda elemanları for döngüsü ile tek tek kopyalamak yerine, 
+// bellek (RAM) seviyesinde blok kopyalama yapan System.arraycopy kullanılmıştır.
+// Bu sayede O(n) karmaşıklığındaki taşıma işlemi donanım hızında çok daha verimli gerçekleşir.
     private void kapasiteyiIkiyeKatla() {
         Gorev[] yeniDizi = new Gorev[dizi.length * 2];
-        for (int i = 0; i < boyut; i++) {
-            yeniDizi[i] = dizi[i];
-        }
+        System.arraycopy(dizi, 0, yeniDizi, 0, boyut);
         dizi = yeniDizi;
     }
     
@@ -131,9 +132,7 @@ public class MinHeap {
 
     public Gorev[] diziOlarakAl() {
         Gorev[] sonuc = new Gorev[boyut];
-        for (int i = 0; i < boyut; i++) {
-            sonuc[i] = dizi[i];
-        }
+        System.arraycopy(dizi, 0, sonuc, 0, boyut);
         return sonuc;
     }
 

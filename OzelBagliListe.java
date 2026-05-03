@@ -3,9 +3,9 @@ public class OzelBagliListe {
 
     // ── İç Sınıf: Dugum ──
     // dugum tek bir vagon. disaridan erisilemez, sadece OzelBagliListe'nin icinde kullanilir
-    private static class Dugum {
-        Gorev veri; // Vagonun icindeki gorev
-        Dugum sonraki; // Vagondaki baglantı kancasi
+    private static final class Dugum {
+        private final Gorev veri; // Vagonun icindeki gorev
+        private Dugum sonraki; // Vagondaki baglantı kancasi
 
         Dugum(Gorev veri) {// yeni bir vagon yaparken gorev bilgisini veriyoruz
             this.veri = veri;
@@ -27,7 +27,7 @@ public class OzelBagliListe {
   
     public void sonunaEkle(Gorev g) {
         // yeni vagon oluşturuyoruz
-        Dugum yeni = new Dugum(g);
+        final Dugum yeni = new Dugum(g);
         // eger tren hiç yoksa (liste boşsa)
         if (bas == null) {
             bas = yeni; // ilk vagon bu olur
@@ -145,6 +145,5 @@ public class OzelBagliListe {
     /**
      * Listede toplam kac gorev olduğunu döndürür
      */
-    public int getBoyut() {
-         return boyut; }
+    public int getBoyut() { return boyut; }
 }
