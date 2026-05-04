@@ -11,19 +11,21 @@
 public class OzelYigin {
 
     // ── İç Düğüm Sınıfı ───────────────────────────────────────────────────────
-
+/** ic ice siniflarda, icteki sinif distaki sinifin elemanlarina 
+ * ihtiyac duymuyorsa static tanimlanir
+ * bu sayede RAM'de daha az yer kaplar */
     private static class Dugum {
         Gorev veri;
         Dugum alt;   // Bir önceki eleman (alt katman)
 
         Dugum(Gorev veri, Dugum alt) {
-            this.veri = veri;
-            this.alt  = alt;
+            this.veri = veri; //gorev nesnesi 
+            this.alt  = alt; //bir onceki eleman
         }
     }
 
     // ── Alanlar ───────────────────────────────────────────────────────────────
-
+    // yiginin sadece en ust noktasini aklinda tutar
     private Dugum tepe;   // Yığının en üst elemanı
     private int boyut;    // Eleman sayısı
 
@@ -36,36 +38,40 @@ public class OzelYigin {
     // ── Temel Operasyonlar ────────────────────────────────────────────────────
 
     /**
-     * Yığına yeni bir görevi en üste ekler (push).
+     * Yığınin en üstune yeni bir görev ekler (push).
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
+     * Zaman Karmaşıklığı:O(1)
      *
      * @param gorev Yığına itilecek görev
      */
     public void it(Gorev gorev) {
-        tepe = new Dugum(gorev, tepe);
+
+/**once yeni bir dugum yaratir, alt okunu da o anki tepeye baglar 
+ * sonra tepeyi yeni dugume esitleyerek yeni gorevi tepe yapar */
+        tepe = new Dugum(gorev, tepe);  
         boyut++;
     }
 
     /**
+     * kullanici geri al butonuna bastiginda calisir
      * Yığının tepesindeki görevi çıkarıp döndürür (pop).
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
+     * Zaman Karmaşıklığı:O(1)
      *
      * @return Tepedeki Gorev nesnesi; yığın boşsa null
      */
     public Gorev cek() {
-        if (tepe == null) return null;
-        Gorev geri = tepe.veri;
-        tepe = tepe.alt;
-        boyut--;
-        return geri;
+        if (tepe == null) return null; //once yigin bos mu diye bakar
+        Gorev geri = tepe.veri; //tepedeki gorevi geri degiskene atar
+        tepe = tepe.alt; //tepeyi bir alt elemana kaydirarak ustteki elemani cikarmis oluruz
+        boyut--; //eski tepeyi Garbage collector yakalayip siler
+        return geri; 
     }
 
     /**
-     * Yığının tepesine bakar, çıkarmaz (peek).
+     * Sadece Yığının tepesine bakar, çıkarmaz (peek).
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
+     * Zaman Karmaşıklığı:O(1)
      *
      * @return Tepedeki Gorev; yığın boşsa null
      */
@@ -76,7 +82,7 @@ public class OzelYigin {
     /**
      * Yığının boş olup olmadığını döndürür.
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
+     * Zaman Karmaşıklığı: O(1)
      *
      * @return true → boş
      */
@@ -94,8 +100,16 @@ public class OzelYigin {
     /**
      * Yığının tüm içeriğini (tepeden tabana doğru) konsola yazar.
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(n)</p>
-     */
+     * Zaman Karmaşıklığı:O(n) 
+     * */
+
+    /**
+     * Yığının tüm içeriğini loglama ve hata ayiklama icin
+     * 
+     *  (tepeden tabana doğru) konsola yazar.
+     *
+     * Zaman Karmaşıklığı:O(n) 
+     * */
     public void listele() {
         if (tepe == null) {
             System.out.println("  (Geri alma yigini bos)");
@@ -103,6 +117,7 @@ public class OzelYigin {
         }
         Dugum gecici = tepe;
         int sira = 1;
+        // tepe en ustte oldugu icin sira 1'den baslar
         while (gecici != null) {
             System.out.println("  " + sira + ". " + gecici.veri);
             gecici = gecici.alt;
