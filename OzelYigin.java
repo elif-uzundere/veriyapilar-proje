@@ -40,7 +40,7 @@ public class OzelYigin {
     /**
      * Yığınin en üstune yeni bir görev ekler (push).
      *
-     * Zaman Karmaşıklığı:O(1)
+     * Big-O Notasyonu: O(1) - Bu işlem sabit zamanda gerçekleşir çünkü bağlı liste yapısında yeni düğüm oluşturup tepe referansını güncellemek yeterlidir.
      *
      * @param gorev Yığına itilecek görev
      */
@@ -56,7 +56,7 @@ public class OzelYigin {
      * kullanici geri al butonuna bastiginda calisir
      * Yığının tepesindeki görevi çıkarıp döndürür (pop).
      *
-     * Zaman Karmaşıklığı:O(1)
+     * Big-O Notasyonu: O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece tepe referansını güncellemek yeterlidir.
      *
      * @return Tepedeki Gorev nesnesi; yığın boşsa null
      */
@@ -71,7 +71,7 @@ public class OzelYigin {
     /**
      * Sadece Yığının tepesine bakar, çıkarmaz (peek).
      *
-     * Zaman Karmaşıklığı:O(1)
+     * Big-O Notasyonu: O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece tepe düğümüne erişim yapılır.
      *
      * @return Tepedeki Gorev; yığın boşsa null
      */
@@ -82,7 +82,7 @@ public class OzelYigin {
     /**
      * Yığının boş olup olmadığını döndürür.
      *
-     * Zaman Karmaşıklığı: O(1)
+     * Big-O Notasyonu: O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece boyut değişkeni kontrol edilir.
      *
      * @return true → boş
      */
@@ -91,7 +91,7 @@ public class OzelYigin {
     /**
      * Yığındaki eleman sayısını döndürür.
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
+     * <p><b>Big-O Notasyonu:</b> O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece boyut değişkeni döndürülür.</p>
      *
      * @return Eleman sayısı
      */
@@ -100,7 +100,7 @@ public class OzelYigin {
     /**
      * Yığının tüm içeriğini (tepeden tabana doğru) konsola yazar.
      *
-     * Zaman Karmaşıklığı:O(n) 
+     * Big-O Notasyonu: O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü tüm elemanlar gezilir.
      * */
 
     /**

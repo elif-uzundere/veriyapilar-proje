@@ -357,6 +357,13 @@ public class Main {
             }
             tabloyuGuncelle();
             verileriKaydet();
+        } else {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Sistemde geri alınacak görev yok. Lütfen önce bir görev tamamlayın ya da silin.",
+                "Geçersiz İşlem",
+                JOptionPane.WARNING_MESSAGE
+            );
         }
     }
 

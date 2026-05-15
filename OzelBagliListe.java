@@ -27,6 +27,8 @@ public class OzelBagliListe {
     /**
      * Sonuna yeni bir görev eklediginde listenin sonuna gider.
      *
+     * Big-O Notasyonu: O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü listenin sonuna ulaşmak için tüm elemanlar gezilir.
+     *
      * en son vagonu bulmak için tüm listeyi tarar,
      * 
      *  bu yüzden zaman karmaşıklığı O(n) olur.
@@ -53,6 +55,7 @@ public class OzelBagliListe {
 
     /**
      * Bu metot, ID numarasina bakarak listeden görev silmemizi saglar
+     * Big-O Notasyonu: O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü silinecek elemanı bulmak için tüm liste taranır.
      */
     public Gorev idIleSil(int id) { // eğer liste boşsa silinecek bir şey yok, null döndür
         if (bas == null) return null;
@@ -93,7 +96,7 @@ public class OzelBagliListe {
      * 
      *  ve o ID'ye sahip görevi döndürür bulamazsa null döndürür.
      *
-     * zaman karmaşıklığı O(n) olur çünkü en kötü durumda tüm listeyi taramamız gerekebilir.
+     * Big-O Notasyonu: O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü aranan elemanı bulmak için tüm liste taranır.
      */
     public Gorev idIleBul(int id) { 
         Dugum gecici = bas; 
@@ -107,7 +110,7 @@ public class OzelBagliListe {
     /**
      * Listenin başındaki görevi döndürür. Liste boşsa null döner.
      *
-     * zaman karmaşıklığı O(1) olur çünkü sadece baş düğümüne bakarız ve listeyi taramayız.
+     * Big-O Notasyonu: O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece baş düğümüne erişim yapılır.
      *
      */
     public Gorev basinaBak() {
@@ -116,7 +119,7 @@ public class OzelBagliListe {
 
     /**
      * Tüm listeyi konsola yazdırır.
-     * Zaman karmaşıklığı O(n) olur çünkü tüm listeyi taramamız gerekir.
+     * Big-O Notasyonu: O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü tüm elemanlar gezilir.
      *
      */
     public void listele() {
@@ -137,7 +140,7 @@ public class OzelBagliListe {
      * Listeyi dosyaya kaydetmek için dizi formatina ceviriyoruz
      * Dosyaya kaydetme işleminde kullanılır.
      *
-     * Zaman karmaşıklığı O(n) olur çünkü tüm listeyi taramamız gerekir.
+     * Big-O Notasyonu: O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü tüm elemanlar kopyalanır.
      */
     public Gorev[] diziOlarakAl() {
         Gorev[] dizi = new Gorev[boyut]; // boyut kadar bir dizi oluşturuyoruz
@@ -153,13 +156,14 @@ public class OzelBagliListe {
     /**
      * Listenin boş olup olmadığına bakar
      *
-     * zaman karmaşıklığı O(1) olur çünkü sadece boyut değişkenine bakarız.
+     * Big-O Notasyonu: O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece boyut değişkeni kontrol edilir.
      *
      */
     public boolean bosmu() { return boyut == 0; } 
 
     /**
      * Listede toplam kac gorev olduğunu döndürür
+     * Big-O Notasyonu: O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece boyut değişkeni döndürülür.
      */
     public int getBoyut() { return boyut; }
 }

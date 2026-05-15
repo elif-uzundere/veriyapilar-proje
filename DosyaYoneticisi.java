@@ -10,7 +10,7 @@ public class DosyaYoneticisi {
     private static final String DOSYA_ADI = "gorevler.csv"; // dosya adini sabit (constant) olarak tanımladık
 
     /*RAM'deki bağlı listeyi alıp Hard Disk'e (CSV formatında) yazar
-    Zaman Karmaşıklığı: O(n) — n: listedeki eleman sayısı */
+    Big-O Notasyonu: O(n) — n: listedeki eleman sayısı - Bu işlem doğrusal zamanda gerçekleşir çünkü tüm elemanlar dosyaya yazılır */
  
     public static void kaydet(OzelBagliListe liste) {
         // Dosyaya yazarken BufferedWriter kullanarak verimli bir şekilde yazıyoruz
@@ -34,7 +34,7 @@ public class DosyaYoneticisi {
       Dosyadan görevleri okuyup bağlı listeye yükler.
       Dosya yoksa sessizce devam eder.
      
-      Zaman Karmaşıklığı: O(n)
+      Big-O Notasyonu: O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü dosyanın tüm satırları okunur ve işlenir.
      
       @param liste         Görevlerin yükleneceği bağlı liste
       @param sonIdSayaci   Mevcut en büyük ID; dosyadaki ID'lere göre güncellenir

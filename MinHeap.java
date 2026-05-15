@@ -13,31 +13,30 @@
  */
 public class MinHeap {
 
-    // ── Sabitler ve Alanlar ───────────────────────────────────────────────────
-
+    
     private static final int BASLANGIC_KAPASITE = 16;//heap in arka planda kullandığı dizinin başlangıç kapasitesi
 
     private Gorev[] dizi;    // Heap dizisi
     private int boyut;       // Geçerli eleman sayısı
 
-    /* constructor */
+    //constructor: heap oluşturulduğunda boş bir dizi ve boyut 0 olarak başlar
     public MinHeap() {
         dizi  = new Gorev[BASLANGIC_KAPASITE];
         boyut = 0;
     }
 
-    // agac yapısında ebeveyn ve çocuk indekslerini hesaplamak
-    // dugumleri baglamak yerine dizi indeksleriyle agac cizilir
+    //dizideki agac dallarini matematiksel olarak hesapliyoruz
+    //bir eleman i. indeksteyse;
     private int ebeveyn(int i)    { return (i - 1) / 2; }
     private int solCocuk(int i)   { return 2 * i + 1; }
     private int sagCocuk(int i)   { return 2 * i + 2; }
 
-    /*yardimci metodlar
-    takas dizideki iki elemanin yerini onceliklerini degistirir */
-    private void takas(int a, int b) {
-        Gorev gecici = dizi[a];
-        dizi[a] = dizi[b];
-        dizi[b] = gecici;
+    /* takas dizideki iki elemanin yerini onceliklerini degistirir */
+
+    private void takas(int a, int b) { // a ve b indekslerindeki görevlerin yerlerini değiştirir
+        Gorev gecici = dizi[a]; // a indeksindeki görevi geçici değişkende sakla
+        dizi[a] = dizi[b]; // b indeksindeki görevi a indeksine taşı
+        dizi[b] = gecici; // geçici değişkende saklanan görevi b indeksine taşı
     }
 
   // DİZİ KAPASİTESİNİ ARTIRMA (ARRAY EXPANSION) İŞLEMİ
@@ -88,7 +87,12 @@ public class MinHeap {
     /* disariya acik metodlar */
     //gorev gelir dizi doluysa kapasite ikiye katlanir, gorev dizinin sonuna eklenir 
     // ve yukariKaydir ile gercek yerine tirmandirilir bir boyut artirilir
-        public void ekle(Gorev gorev) {
+    /**
+     * Heap'e yeni bir görev ekler.
+     * <p><b>Big-O Notasyonu:</b> O(log n) - Bu işlem logaritmik zamanda gerçekleşir çünkü heap özelliği korunmak için yukarı kaydırma işlemi yapılır.</p>
+     * @param gorev Eklenecek görev
+     */
+    public void ekle(Gorev gorev) {
         if (boyut == dizi.length) kapasiteyiIkiyeKatla();
         dizi[boyut] = gorev;
         yukariKaydir(boyut);
@@ -97,6 +101,7 @@ public class MinHeap {
 
     /**tepdeki elemani dizi[0] alir yerine son eleman gelir, boyut azalir ve asagiKaydir
      *  ile gercek yerine indirilir
+     * <p><b>Big-O Notasyonu:</b> O(log n) - Bu işlem logaritmik zamanda gerçekleşir çünkü heap özelliği korunmak için aşağı kaydırma işlemi yapılır.</p>
      * @return En acil Gorev; heap boşsa null
      */
     public Gorev enOncelikliyiCek() {
@@ -114,22 +119,35 @@ public class MinHeap {
      bu metod belirli bir id ye sahip gorevi bulur ve onceligini gunceller
      * @return Kök Gorev; heap boşsa null
      */
+    /**
+     * Heap'in kökündeki en öncelikli görevi döndürür (çıkarmadan).
+     * <p><b>Big-O Notasyonu:</b> O(1) - Bu işlem sabit zamanda gerçekleşir çünkü kök elemana doğrudan erişim yapılır.</p>
+     * @return Kök Gorev; heap boşsa null
+     */
     public Gorev tepeyeBak() {
         return (boyut == 0) ? null : dizi[0];
     }
 
-    /* Heap'in boş olup olmadığını kontrol eder.
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
+    /**
+     * Heap'in boş olup olmadığını kontrol eder.
+     * <p><b>Big-O Notasyonu:</b> O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece boyut değişkeni kontrol edilir.</p>
+     * @return Heap boşsa true, değilse false
      */
     public boolean bosmu() { return boyut == 0; }
 
     /**
      * Heap'teki eleman sayısını döndürür.
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(1)</p>
+     * <p><b>Big-O Notasyonu:</b> O(1) - Bu işlem sabit zamanda gerçekleşir çünkü sadece boyut değişkeni döndürülür.</p>
+     * @return Heap'teki eleman sayısı
      */
     public int getBoyut() { return boyut; }
 
+    /**
+     * Heap'teki tüm görevleri bir dizi olarak döndürür.
+     * <p><b>Big-O Notasyonu:</b> O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü tüm elemanlar kopyalanır.</p>
+     * @return Görev dizisi
+     */
     public Gorev[] diziOlarakAl() {
         Gorev[] sonuc = new Gorev[boyut];
         System.arraycopy(dizi, 0, sonuc, 0, boyut);
@@ -137,11 +155,15 @@ public class MinHeap {
     }
 
     /* heap'teki tüm görevleri öncelik sırasına göre listeler (en acil ilk).
-     * <p><b>Zaman Karmaşıklığı:</b> O(n)</p>
+     * <p><b>Big-O Notasyonu:</b> O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü tüm elemanlar gezilir.</p>
      */
     /* kuyruk bos mu diye bakar bossa islem kuyrugu bos yazar ve return ile metodu bitirir.
     eger doluysa 0. indeksten baslar boyuta kadar devam eder ve icerideki her gorevin toString() metodunu basar.
       */
+    /**
+     * Heap'teki tüm görevleri öncelik sırasına göre listeler (en acil ilk).
+     * <p><b>Zaman Karmaşıklığı:</b> O(n)</p>
+     */
     public void listele() {
         if (boyut == 0) {
             System.out.println("  (Islem kuyrugu bos)");
@@ -156,7 +178,7 @@ public class MinHeap {
      * Heap'teki belirli bir ID'ye sahip görevin önceliğini günceller.
      * Aging (yaşlandırma) mekanizması için kullanılır.
      *
-     * <p><b>Zaman Karmaşıklığı:</b> O(n) arama + O(log n) düzeltme = O(n)</p>
+     * <p><b>Big-O Notasyonu:</b> O(n) - Bu işlem doğrusal zamanda gerçekleşir çünkü arama işlemi tüm elemanları tarar, ardından logaritmik düzeltme yapılır.</p>
      *
      * @param id          Güncellenecek görev kimliği
      * @param yeniOncelik Yeni öncelik değeri
